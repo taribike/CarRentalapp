@@ -22,6 +22,8 @@ builder.Services.AddSingleton<IMongoClient>(serviceProvider =>
 builder.Services.AddScoped<ICarService, CarService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddHttpClient<PayPalService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // CORS configuration
 builder.Services.AddCors(options =>
