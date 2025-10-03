@@ -1,4 +1,4 @@
-package com.carrental.frontend.ui;
+package com.carrental.frontend;
 
 import com.carrental.frontend.models.Car;
 import com.carrental.frontend.models.Customer;
