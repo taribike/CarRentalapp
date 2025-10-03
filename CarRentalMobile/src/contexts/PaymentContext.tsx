@@ -1,7 +1,8 @@
 import React, {createContext, useContext, useState, useEffect, ReactNode} from 'react';
 import PaymentService from '../services/PaymentService';
 import {Config} from '../constants/Config';
-import {PaymentProvider, PaymentResult} from '../services/PaymentService';
+import {PaymentResult} from '../services/PaymentService';
+import {PaymentProvider} from '../models/Payment';
 
 interface PaymentContextType {
   isStripeInitialized: boolean;
@@ -18,11 +19,11 @@ interface PaymentContextType {
 
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
-interface PaymentProviderProps {
+interface PaymentContextProviderProps {
   children: ReactNode;
 }
 
-export const PaymentProvider: React.FC<PaymentProviderProps> = ({children}) => {
+export const PaymentContextProvider: React.FC<PaymentContextProviderProps> = ({children}) => {
   const [isStripeInitialized, setIsStripeInitialized] = useState(false);
 
   const initializePayments = async () => {
@@ -78,7 +79,7 @@ export const PaymentProvider: React.FC<PaymentProviderProps> = ({children}) => {
 export const usePayment = (): PaymentContextType => {
   const context = useContext(PaymentContext);
   if (context === undefined) {
-    throw new Error('usePayment must be used within a PaymentProvider');
+    throw new Error('usePayment must be used within a PaymentContextProvider');
   }
   return context;
 };

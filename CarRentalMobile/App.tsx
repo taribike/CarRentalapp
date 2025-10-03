@@ -4,7 +4,7 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createStackNavigator} from '@react-navigation/stack';
 import {StatusBar} from 'react-native';
 
-import {PaymentProvider} from './src/contexts/PaymentContext';
+import {PaymentContextProvider} from './src/contexts/PaymentContext';
 
 // Import screens
 import HomeScreen from './src/screens/cars/HomeScreen';
@@ -70,7 +70,7 @@ function TabNavigator() {
 
 function App(): React.JSX.Element {
   return (
-    <PaymentProvider>
+    <PaymentContextProvider>
       <NavigationContainer>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         <Stack.Navigator
@@ -105,7 +105,7 @@ function App(): React.JSX.Element {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </PaymentProvider>
+    </PaymentContextProvider>
   );
 }
 
