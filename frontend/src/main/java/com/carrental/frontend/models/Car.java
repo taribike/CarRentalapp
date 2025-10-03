@@ -1,7 +1,6 @@
 package com.carrental.frontend.models;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 public class Car {
     private String id;
