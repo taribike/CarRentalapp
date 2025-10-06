@@ -15,6 +15,13 @@ namespace CarRentalAPI.Controllers
             _paymentService = paymentService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<PaymentResponse>>> GetAllPayments()
+        {
+            var payments = await _paymentService.GetAllPaymentsAsync();
+            return Ok(payments);
+        }
+
         [HttpPost]
         public async Task<ActionResult<PaymentResponse>> CreatePayment([FromBody] PaymentRequest request)
         {

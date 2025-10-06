@@ -19,13 +19,13 @@ namespace CarRentalAPI.Services
             _httpClient = httpClient;
         }
 
-        public async Task<string> CreateOrderAsync(decimal amount, string currency, string description)
+        public Task<string> CreateOrderAsync(decimal amount, string currency, string description)
         {
             try
             {
                 // For now, return a placeholder URL
                 // In a real implementation, you would make HTTP calls to PayPal API
-                return $"https://www.sandbox.paypal.com/checkoutnow?token=PAYMENT_TOKEN_{Guid.NewGuid()}";
+                return Task.FromResult($"https://www.sandbox.paypal.com/checkoutnow?token=PAYMENT_TOKEN_{Guid.NewGuid()}");
             }
             catch (Exception ex)
             {

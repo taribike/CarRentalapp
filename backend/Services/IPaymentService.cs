@@ -4,6 +4,7 @@ namespace CarRentalAPI.Services
 {
     public interface IPaymentService
     {
+        Task<List<PaymentResponse>> GetAllPaymentsAsync();
         Task<PaymentResponse> CreatePaymentAsync(PaymentRequest request);
         Task<PaymentResponse> GetPaymentAsync(string paymentId);
         Task<List<PaymentResponse>> GetPaymentsByBookingAsync(string bookingId);

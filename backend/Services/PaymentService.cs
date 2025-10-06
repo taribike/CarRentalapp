@@ -21,6 +21,12 @@ namespace CarRentalAPI.Services
             _payPalService = payPalService;
         }
 
+        public async Task<List<PaymentResponse>> GetAllPaymentsAsync()
+        {
+            var payments = await _payments.Find(_ => true).ToListAsync();
+            return payments.Select(MapToResponse).ToList();
+        }
+
         public async Task<PaymentResponse> CreatePaymentAsync(PaymentRequest request)
         {
             var payment = new Payment
