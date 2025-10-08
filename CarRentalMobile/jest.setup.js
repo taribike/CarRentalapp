@@ -3,6 +3,15 @@ import 'react-native-gesture-handler/jestSetup';
 // Mock react-native modules
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter');
 
+// Mock StyleSheet.flatten to prevent errors in tests
+jest.mock('react-native/Libraries/StyleSheet/StyleSheet', () => {
+  const actualStyleSheet = jest.requireActual('react-native/Libraries/StyleSheet/StyleSheet');
+  return {
+    ...actualStyleSheet,
+    flatten: jest.fn((style) => style),
+  };
+});
+
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
@@ -42,16 +51,12 @@ jest.mock('@stripe/stripe-react-native', () => ({
   CardField: 'CardField',
 }));
 
-// Mock PayPal
-jest.mock('react-native-paypal', () => ({
-  PayPal: {
-    initialize: jest.fn(),
-    pay: jest.fn(),
-  },
-}));
-
 // Mock react-native-date-picker
 jest.mock('react-native-date-picker', () => 'DatePicker');
+
+// Suppress console.error and console.warn during tests to reduce noise
+global.console.error = jest.fn();
+global.console.warn = jest.fn();
 
 // Global test timeout
 jest.setTimeout(10000);

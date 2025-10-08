@@ -7,4 +7,14 @@ module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  // Use watchman for better performance on macOS
+  watchman: true,
+  // Optimize watch mode
+  watchPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/android/',
+    '<rootDir>/ios/',
+    '<rootDir>/coverage/',
+    '<rootDir>/.git/',
+  ],
 };
