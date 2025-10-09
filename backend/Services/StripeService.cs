@@ -6,36 +6,78 @@ namespace CarRentalAPI.Services
     {
         private readonly string _secretKey;
         private readonly string _publishableKey;
+        private readonly bool _testMode;
+        private readonly bool _allowMockPayments;
 
         public StripeService(IConfiguration configuration)
         {
-            _secretKey = configuration["Stripe:SecretKey"] ?? throw new ArgumentNullException("Stripe:SecretKey");
-            _publishableKey = configuration["Stripe:PublishableKey"] ?? throw new ArgumentNullException("Stripe:PublishableKey");
+            _secretKey = configuration["Stripe:SecretKey"] ?? "sk_test_placeholder";
+            _publishableKey = configuration["Stripe:PublishableKey"] ?? "pk_test_placeholder";
+            _testMode = configuration.GetValue<bool>("Payment:TestMode", true);
+            _allowMockPayments = configuration.GetValue<bool>("Payment:AllowMockPayments", true);
             
-            StripeConfiguration.ApiKey = _secretKey;
+            // Only set Stripe API key if we have real keys
+            if (!IsPlaceholderKey(_secretKey))
+            {
+                StripeConfiguration.ApiKey = _secretKey;
+            }
+        }
+
+        private bool IsPlaceholderKey(string key)
+        {
+            return key.Contains("placeholder") || 
+                   key.Contains("your_") || 
+                   key.Contains("_here") ||
+                   key == "sk_test_placeholder" ||
+                   key == "pk_test_placeholder";
+        }
+
+        private bool IsTestModeEnabled()
+        {
+            return _testMode && _allowMockPayments;
         }
 
         public async Task<string> CreatePaymentIntentAsync(decimal amount, string currency, string description)
         {
-            var options = new PaymentIntentCreateOptions
+            // If in test mode with placeholder keys, return a mock client secret
+            if (IsTestModeEnabled() && IsPlaceholderKey(_secretKey))
             {
-                Amount = (long)(amount * 100), // Convert to cents
-                Currency = currency.ToLower(),
-                Description = description,
-                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                var mockSecret = $"pi_mock_{Guid.NewGuid().ToString("N").Substring(0, 24)}_secret_{Guid.NewGuid().ToString("N").Substring(0, 24)}";
+                return await Task.FromResult(mockSecret);
+            }
+
+            try
+            {
+                var options = new PaymentIntentCreateOptions
                 {
-                    Enabled = true,
-                },
-            };
+                    Amount = (long)(amount * 100), // Convert to cents
+                    Currency = currency.ToLower(),
+                    Description = description,
+                    AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                    {
+                        Enabled = true,
+                    },
+                };
 
-            var service = new PaymentIntentService();
-            var paymentIntent = await service.CreateAsync(options);
+                var service = new PaymentIntentService();
+                var paymentIntent = await service.CreateAsync(options);
 
-            return paymentIntent.ClientSecret;
+                return paymentIntent.ClientSecret;
+            }
+            catch (StripeException ex)
+            {
+                throw new Exception($"Stripe API Error: {ex.Message}. Please configure valid Stripe API keys or enable test mode in appsettings.", ex);
+            }
         }
 
         public async Task<bool> ConfirmPaymentIntentAsync(string paymentIntentId)
         {
+            // If in test mode with mock payment intent, always return success
+            if (IsTestModeEnabled() && paymentIntentId.StartsWith("pi_mock_"))
+            {
+                return await Task.FromResult(true);
+            }
+
             try
             {
                 var service = new PaymentIntentService();
@@ -51,6 +93,12 @@ namespace CarRentalAPI.Services
 
         public async Task<bool> RefundPaymentAsync(string paymentIntentId, decimal? amount = null)
         {
+            // If in test mode with mock payment intent, always return success
+            if (IsTestModeEnabled() && paymentIntentId.StartsWith("pi_mock_"))
+            {
+                return await Task.FromResult(true);
+            }
+
             try
             {
                 var options = new RefundCreateOptions

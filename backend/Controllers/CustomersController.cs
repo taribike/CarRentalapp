@@ -50,7 +50,32 @@ namespace CarRentalAPI.Controllers
                 // Check if customer with email already exists
                 var existingCustomer = await _customerService.GetCustomerByEmailAsync(request.Email);
                 if (existingCustomer != null)
-                    return BadRequest("Customer with this email already exists");
+                    return BadRequest(new { 
+                        message = "Customer with this email already exists", 
+                        existingCustomerId = existingCustomer.Id,
+                        existingCustomerEmail = existingCustomer.Email
+                    });
+
+                var customer = await _customerService.CreateCustomerAsync(request);
+                return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("get-or-create")]
+        public async Task<ActionResult<Customer>> GetOrCreateCustomer([FromBody] CreateCustomerRequest request)
+        {
+            try
+            {
+                // Check if customer with email already exists
+                var existingCustomer = await _customerService.GetCustomerByEmailAsync(request.Email);
+                if (existingCustomer != null)
+                {
+                    return Ok(existingCustomer);
+                }
 
                 var customer = await _customerService.CreateCustomerAsync(request);
                 return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);

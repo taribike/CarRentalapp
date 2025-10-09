@@ -62,9 +62,9 @@ const CarDetailsScreen: React.FC<Props> = ({navigation, route}) => {
 
     setLoading(true);
     try {
-      // For now, we'll use a placeholder customer ID
+      // For now, we'll use a test customer ID
       // In a real app, this would come from user authentication
-      const customerId = 'placeholder-customer-id';
+      const customerId = '68e6b2d07f1934fa11651945';
 
       const bookingRequest = {
         customerId,

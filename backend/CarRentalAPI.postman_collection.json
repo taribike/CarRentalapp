@@ -80,6 +80,34 @@
 				},
 				{
 					"name": "Create Customer",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique email using timestamp",
+									"const timestamp = Date.now();",
+									"pm.variables.set(\"unique_email\", `customer${timestamp}@example.com`);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const responseData = pm.response.json();",
+									"    pm.environment.set(\"customer_id\", responseData.id);",
+									"    pm.environment.set(\"customer_email\", responseData.email);",
+									"    console.log(\"Created customer ID:\", responseData.id);",
+									"    console.log(\"Customer email:\", responseData.email);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -90,7 +118,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"address\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"dateOfBirth\": \"1990-01-15T00:00:00Z\",\n  \"driversLicense\": \"DL123456789\"\n}"
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{unique_email}}\",\n  \"phone\": \"+1234567890\",\n  \"address\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"dateOfBirth\": \"1990-01-15T00:00:00Z\",\n  \"driversLicense\": \"DL123456789\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/customers",
@@ -102,6 +130,51 @@
 								"customers"
 							]
 						}
+					}
+				},
+				{
+					"name": "Get or Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const responseData = pm.response.json();",
+									"    pm.environment.set(\"customer_id\", responseData.id);",
+									"    pm.environment.set(\"customer_email\", responseData.email);",
+									"    console.log(\"Customer ID:\", responseData.id);",
+									"    console.log(\"Customer email:\", responseData.email);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"+1987654321\",\n  \"address\": {\n    \"street\": \"456 Oak Ave\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"zipCode\": \"90210\",\n    \"country\": \"USA\"\n  },\n  \"dateOfBirth\": \"1985-05-20T00:00:00Z\",\n  \"driversLicense\": \"DL987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/customers/get-or-create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"get-or-create"
+							]
+						},
+						"description": "Gets existing customer by email or creates a new one if it doesn't exist. This is useful to avoid duplicate email errors."
 					}
 				},
 				{

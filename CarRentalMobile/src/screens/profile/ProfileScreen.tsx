@@ -52,9 +52,9 @@ const ProfileScreen: React.FC<Props> = ({navigation}) => {
 
   const loadCustomer = async () => {
     try {
-      // For now, we'll use a placeholder customer ID
+      // For now, we'll use a test customer ID
       // In a real app, this would come from user authentication
-      const customerId = 'placeholder-customer-id';
+      const customerId = '68e6b2d07f1934fa11651945';
       
       try {
         const customerData = await ApiService.getCustomer(customerId);

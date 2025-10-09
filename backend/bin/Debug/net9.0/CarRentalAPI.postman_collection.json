@@ -80,6 +80,34 @@
 				},
 				{
 					"name": "Create Customer",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Generate a unique email using timestamp",
+									"const timestamp = Date.now();",
+									"pm.variables.set(\"unique_email\", `customer${timestamp}@example.com`);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    const responseData = pm.response.json();",
+									"    pm.environment.set(\"customer_id\", responseData.id);",
+									"    pm.environment.set(\"customer_email\", responseData.email);",
+									"    console.log(\"Created customer ID:\", responseData.id);",
+									"    console.log(\"Customer email:\", responseData.email);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -90,7 +118,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"address\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"dateOfBirth\": \"1990-01-15T00:00:00Z\",\n  \"driversLicense\": \"DL123456789\"\n}"
+							"raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"{{unique_email}}\",\n  \"phone\": \"+1234567890\",\n  \"address\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\"\n  },\n  \"dateOfBirth\": \"1990-01-15T00:00:00Z\",\n  \"driversLicense\": \"DL123456789\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/customers",
@@ -102,6 +130,51 @@
 								"customers"
 							]
 						}
+					}
+				},
+				{
+					"name": "Get or Create Customer",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const responseData = pm.response.json();",
+									"    pm.environment.set(\"customer_id\", responseData.id);",
+									"    pm.environment.set(\"customer_email\", responseData.email);",
+									"    console.log(\"Customer ID:\", responseData.id);",
+									"    console.log(\"Customer email:\", responseData.email);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"+1987654321\",\n  \"address\": {\n    \"street\": \"456 Oak Ave\",\n    \"city\": \"Los Angeles\",\n    \"state\": \"CA\",\n    \"zipCode\": \"90210\",\n    \"country\": \"USA\"\n  },\n  \"dateOfBirth\": \"1985-05-20T00:00:00Z\",\n  \"driversLicense\": \"DL987654321\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/customers/get-or-create",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"get-or-create"
+							]
+						},
+						"description": "Gets existing customer by email or creates a new one if it doesn't exist. This is useful to avoid duplicate email errors."
 					}
 				},
 				{
@@ -216,7 +289,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"make\": \"Toyota\",\n  \"minYear\": 2020,\n  \"maxDailyRate\": 100,\n  \"fuelType\": \"Gasoline\",\n  \"transmission\": \"Automatic\",\n  \"minSeats\": 4,\n  \"isAvailable\": true,\n  \"availableFrom\": \"2024-01-15T00:00:00Z\",\n  \"availableTo\": \"2024-01-20T00:00:00Z\"\n}"
+							"raw": "{\n  \"make\": \"Toyota\",\n  \"minYear\": 2020,\n  \"maxDailyRate\": 100,\n  \"fuelType\": \"Gasoline\",\n  \"transmission\": \"Automatic\",\n  \"minSeats\": 4,\n  \"isAvailable\": true,\n  \"availableFrom\": \"2025-12-15T00:00:00Z\",\n  \"availableTo\": \"2025-12-20T00:00:00Z\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/cars/search",
@@ -295,7 +368,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/cars/{{car_id}}/availability?from=2024-01-15T00:00:00Z&to=2024-01-20T00:00:00Z",
+							"raw": "{{base_url}}/api/cars/{{car_id}}/availability?from=2025-12-15T00:00:00Z&to=2025-12-20T00:00:00Z",
 							"host": [
 								"{{base_url}}"
 							],
@@ -308,11 +381,11 @@
 							"query": [
 								{
 									"key": "from",
-									"value": "2024-01-15T00:00:00Z"
+									"value": "2025-12-15T00:00:00Z"
 								},
 								{
 									"key": "to",
-									"value": "2024-01-20T00:00:00Z"
+									"value": "2025-12-20T00:00:00Z"
 								}
 							]
 						}
@@ -451,7 +524,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"customerId\": \"{{customer_id}}\",\n  \"carId\": \"{{car_id}}\",\n  \"pickupDate\": \"2024-01-15T10:00:00Z\",\n  \"returnDate\": \"2024-01-20T10:00:00Z\",\n  \"pickupLocation\": \"Airport Terminal 1\",\n  \"returnLocation\": \"Airport Terminal 1\",\n  \"notes\": \"Customer prefers automatic transmission\"\n}"
+							"raw": "{\n  \"customerId\": \"{{customer_id}}\",\n  \"carId\": \"{{car_id}}\",\n  \"pickupDate\": \"2025-12-15T10:00:00Z\",\n  \"returnDate\": \"2025-12-20T10:00:00Z\",\n  \"pickupLocation\": \"Airport Terminal 1\",\n  \"returnLocation\": \"Airport Terminal 1\",\n  \"notes\": \"Customer prefers automatic transmission\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/bookings",
@@ -477,7 +550,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"pickupDate\": \"2024-01-16T10:00:00Z\",\n  \"returnDate\": \"2024-01-21T10:00:00Z\",\n  \"status\": \"Confirmed\",\n  \"notes\": \"Updated pickup time\"\n}"
+							"raw": "{\n  \"pickupDate\": \"2025-12-16T10:00:00Z\",\n  \"returnDate\": \"2025-12-21T10:00:00Z\",\n  \"status\": \"Confirmed\",\n  \"notes\": \"Updated pickup time\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/bookings/{{booking_id}}",
@@ -649,7 +722,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"customerId\": \"{{customer_id}}\",\n  \"amount\": 375.00,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"CreditCard\",\n  \"paymentProvider\": \"Stripe\",\n  \"description\": \"Payment for car rental booking\"\n}"
+							"raw": "{\n  \"bookingId\": \"{{booking_id}}\",\n  \"customerId\": \"{{customer_id}}\",\n  \"amount\": 375.00,\n  \"currency\": \"USD\",\n  \"paymentMethod\": 0,\n  \"paymentProvider\": 0,\n  \"description\": \"Payment for car rental booking\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/payments",
@@ -837,7 +910,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://localhost:7000",
+			"value": "http://localhost:5000",
 			"type": "string"
 		},
 		{
